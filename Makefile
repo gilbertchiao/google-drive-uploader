@@ -5,11 +5,13 @@ EMBED_CREDS := internal/embedded/credentials.json
 CREDENTIALS ?=
 FOLDER_ID   ?=
 SUBJECT     ?=
+VERSION     ?= v1.0.0
 
 .PHONY: build test fmt vet clean help
 
 help:
-	@echo "make build CREDENTIALS=path/to/credentials.json FOLDER_ID=xxx [SUBJECT=user@domain]"
+	@echo "make build CREDENTIALS=path/to/credentials.json FOLDER_ID=xxx [SUBJECT=user@domain] [VERSION=vX.Y.Z]"
+	@echo "  VERSION 預設 v1.0.0,會編進 binary(gdrive-upload --version 可查看)"
 	@echo "make test | fmt | vet | clean"
 
 ## build: 注入 credentials 與 folderID 後編譯,結束後還原佔位檔
@@ -21,7 +23,7 @@ build:
 		trap 'printf "{}" > "$(EMBED_CREDS)"' EXIT; \
 		cp "$(CREDENTIALS)" "$(EMBED_CREDS)"; \
 		mkdir -p bin; \
-		CGO_ENABLED=0 go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT)" -o bin/$(BINARY) $(CMD_PKG); \
+		CGO_ENABLED=0 go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT) -X main.version=$(VERSION)" -o bin/$(BINARY) $(CMD_PKG); \
 		echo "已輸出 bin/$(BINARY)(靜態,CGO_ENABLED=0)"
 
 test:

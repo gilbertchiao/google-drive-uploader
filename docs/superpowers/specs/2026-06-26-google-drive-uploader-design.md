@@ -22,7 +22,7 @@ gdrive-upload [-name 遠端檔名] [-v] <本地檔案路徑>
 | 目標資料夾 | folderID 於 build 時內嵌進 binary |
 | 目標硬碟類型 | 我的雲端硬碟（My Drive）資料夾 |
 | 同名檔案處理 | 覆蓋（先 find by name，有則 update、無則 create） |
-| 內嵌機制 | `go:embed`（credentials）+ `-ldflags -X`（folderID / subject）+ Makefile |
+| 內嵌機制 | `go:embed`（credentials）+ `-ldflags -X`（folderID / subject / version）+ Makefile |
 | 大檔上傳 | 官方 client 的 resumable upload，chunk size 16MB，回報進度 |
 | 權限 scope | `drive.file`（最小權限，只管自己建立的檔案） |
 
@@ -88,15 +88,15 @@ Makefile `build` 流程：
 
 1. 驗證 `CREDENTIALS` 檔案存在、`FOLDER_ID` 非空。
 2. 複製真實 creds → `internal/embedded/credentials.json`。
-3. `go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT)" -o bin/gdrive-upload ./cmd/gdrive-upload`。
+3. `CGO_ENABLED=0 go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT) -X main.version=$(VERSION)" -o bin/gdrive-upload ./cmd/gdrive-upload`（`VERSION` 預設 `v1.0.0`）。
 4. 無論成功與否，皆還原 `internal/embedded/credentials.json` 為佔位 `{}`（避免誤 commit 真實憑證）。
 
 - `credentials`（多行 JSON）→ 用 `go:embed`。
-- `folderID` / `subject`（單行字串）→ 用 `-ldflags -X`。
+- `folderID` / `subject` / `version`（單行字串）→ 用 `-ldflags -X`。
 
 ## 7. 執行行為
 
-1. 解析參數：取得本地檔案路徑；`-name` 可覆寫遠端檔名（預設 `filepath.Base()`）；`-v` 開 Debug log。
+1. 解析參數：取得本地檔案路徑；`-name` 可覆寫遠端檔名（預設 `filepath.Base()`）；`--verbose` 開 Debug log；`-v`/`--version` 顯示版本號（預設 `v1.0.0`，可於 build 時以 `-ldflags -X main.version` 覆寫）並結束。
 2. 啟動前驗證：
    - 本地檔案存在且可讀。
    - 內嵌 credentials 非佔位（含 `client_email` 與 `private_key`）。
@@ -113,7 +113,7 @@ Makefile `build` 流程：
 
 - 顯式檢查 error，向上以 `fmt.Errorf("...: %w", err)` 包裝保留錯誤鏈。
 - 特別偵測 `*googleapi.Error` 中 `storageQuotaExceeded`，印出 Shared Drive / delegation 指引。
-- 日誌用 `log/slog`（TextHandler，stderr）；`-v` 切 `LevelDebug`，否則 `LevelInfo`。
+- 日誌用 `log/slog`（TextHandler，stderr）；`--verbose` 切 `LevelDebug`，否則 `LevelInfo`。
 
 ## 9. 測試策略
 
