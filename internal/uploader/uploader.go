@@ -42,6 +42,9 @@ type Uploader struct {
 
 // New 依 Config 建立連到 Google Drive 的 Uploader。
 func New(ctx context.Context, cfg Config, log *slog.Logger) (*Uploader, error) {
+	if log == nil {
+		log = slog.Default()
+	}
 	if cfg.FolderID == "" {
 		return nil, errors.New("folderID 為空,請於 build 時以 -ldflags 注入")
 	}
@@ -164,14 +167,23 @@ func (d *driveService) update(ctx context.Context, fileID string, media io.Reade
 }
 
 // progress 回傳一個會以 slog 回報上傳進度的 ProgressUpdater。
+//
+// resumable upload 的 callback 可能頻繁觸發,為避免 log 洪水,只在進度每跨越
+// 一個 10% 區間或上傳完成時才以 Info 記錄一次;總大小未知時降為 Debug。
 func (d *driveService) progress(total int64) googleapi.ProgressUpdater {
+	lastBucket := -1
 	return func(current, _ int64) {
-		if total > 0 {
-			d.log.Info("上傳進度", "bytes", current, "total", total,
-				"percent", fmt.Sprintf("%.1f%%", float64(current)/float64(total)*100))
+		if total <= 0 {
+			d.log.Debug("上傳進度", "bytes", current)
 			return
 		}
-		d.log.Info("上傳進度", "bytes", current)
+		pct := float64(current) / float64(total) * 100
+		bucket := int(pct) / 10
+		if bucket > lastBucket || current >= total {
+			lastBucket = bucket
+			d.log.Info("上傳進度", "bytes", current, "total", total,
+				"percent", fmt.Sprintf("%.1f%%", pct))
+		}
 	}
 }
 

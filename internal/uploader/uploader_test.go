@@ -1,11 +1,13 @@
 package uploader
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -156,6 +158,21 @@ func TestWrapQuotaError(t *testing.T) {
 func TestWrapQuotaError_OtherErrorUnchanged(t *testing.T) {
 	in := assertErr("some other error")
 	assert.Equal(t, in, wrapQuotaError(in))
+}
+
+// progress callback 頻繁觸發時應節流:每 10% 或完成才記一次,不應每次都記。
+func TestProgress_Throttled(t *testing.T) {
+	var buf bytes.Buffer
+	d := &driveService{log: slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelInfo}))}
+
+	p := d.progress(100)
+	for i := int64(0); i <= 100; i++ {
+		p(i, 100)
+	}
+
+	lines := strings.Count(buf.String(), "上傳進度")
+	assert.LessOrEqual(t, lines, 12, "101 次 callback 不應產生超過 ~12 條 log")
+	assert.GreaterOrEqual(t, lines, 10)
 }
 
 // assertErr 是測試用的簡單 error。
