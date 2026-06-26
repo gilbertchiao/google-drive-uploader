@@ -1,6 +1,7 @@
 # Binaries
 /bin/
-gdrive-upload
+# 只忽略 repo 根目錄的 binary,避免誤傷 cmd/gdrive-upload/ 目錄
+/gdrive-upload
 
 # Working/Temporary directories
 work/
