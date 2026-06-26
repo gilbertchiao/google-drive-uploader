@@ -17,11 +17,12 @@ build:
 	@test -n "$(CREDENTIALS)" || { echo "錯誤: 請指定 CREDENTIALS=/path/to/credentials.json"; exit 1; }
 	@test -f "$(CREDENTIALS)" || { echo "錯誤: 找不到憑證檔 $(CREDENTIALS)"; exit 1; }
 	@test -n "$(FOLDER_ID)"   || { echo "錯誤: 請指定 FOLDER_ID=<Google Drive 資料夾 ID>"; exit 1; }
-	@cp "$(CREDENTIALS)" "$(EMBED_CREDS)"
-	@trap 'printf "{}" > "$(EMBED_CREDS)"' EXIT; \
+	@set -e; \
+		trap 'printf "{}" > "$(EMBED_CREDS)"' EXIT; \
+		cp "$(CREDENTIALS)" "$(EMBED_CREDS)"; \
 		mkdir -p bin; \
-		go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT)" -o bin/$(BINARY) $(CMD_PKG)
-	@echo "已輸出 bin/$(BINARY)"
+		CGO_ENABLED=0 go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT)" -o bin/$(BINARY) $(CMD_PKG); \
+		echo "已輸出 bin/$(BINARY)(靜態,CGO_ENABLED=0)"
 
 test:
 	go test ./...

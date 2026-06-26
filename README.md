@@ -49,7 +49,8 @@
 ### 3. Go toolchain
 
 相依套件 `google.golang.org/api` 要求 Go ≥ 1.25.8。若系統 Go 較舊,Go 預設的 `GOTOOLCHAIN=auto`
-會在 build 時自動下載對應 toolchain(需網路)。**build 完成後的 binary 為靜態執行檔,執行時不需 Go 或任何 runtime。**
+會在 build 時自動下載對應 toolchain(需網路)。**Makefile 以 `CGO_ENABLED=0` 產生靜態、單一可執行檔,
+複製到目標主機即可執行,不需 Go toolchain 或任何 runtime。**
 
 ---
 
