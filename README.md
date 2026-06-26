@@ -131,3 +131,9 @@ make clean  # 清掉 bin/ 並還原佔位憑證
 ```
 
 設計與分階段實作計劃見 `docs/superpowers/`。
+
+---
+
+## 授權
+
+本專案採用 [MIT License](LICENSE)。
