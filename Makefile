@@ -10,7 +10,8 @@ VERSION     ?= v1.0.0
 .PHONY: build test fmt vet clean help
 
 help:
-	@echo "make build CREDENTIALS=path/to/credentials.json FOLDER_ID=xxx [SUBJECT=user@domain]"
+	@echo "make build CREDENTIALS=path/to/credentials.json FOLDER_ID=xxx [SUBJECT=user@domain] [VERSION=vX.Y.Z]"
+	@echo "  VERSION 預設 v1.0.0,會編進 binary(gdrive-upload --version 可查看)"
 	@echo "make test | fmt | vet | clean"
 
 ## build: 注入 credentials 與 folderID 後編譯,結束後還原佔位檔
