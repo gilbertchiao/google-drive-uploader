@@ -1,0 +1,16 @@
+# Binaries
+/bin/
+gdrive-upload
+
+# Working/Temporary directories
+work/
+temp/
+tmp/
+
+# Go
+*.test
+*.out
+*.prof
+
+# 注意:internal/embedded/credentials.json 以佔位 {} 進版控,不可在此忽略。
+# 真實 Service Account 憑證請勿 commit(Makefile build 後會自動還原佔位)。
