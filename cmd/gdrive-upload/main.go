@@ -12,11 +12,15 @@ import (
 	"github.com/gilbertchiao/google-drive-uploader/internal/uploader"
 )
 
-// 以 -ldflags "-X main.folderID=... -X main.subject=..." 於 build 時注入。
+// 以 -ldflags "-X main.folderID=... -X main.subject=... -X main.version=..." 於 build 時注入。
 var (
 	folderID string
 	subject  string
+	version  = "v1.0.0"
 )
+
+// appName 為顯示用的程式名稱。
+const appName = "gdrive-upload"
 
 func main() {
 	if err := run(); err != nil {
@@ -26,10 +30,22 @@ func main() {
 }
 
 func run() error {
-	name := flag.String("name", "", "上傳到 Drive 後的檔名(預設取本地檔名)")
-	verbose := flag.Bool("v", false, "顯示 debug 等級日誌")
+	var (
+		name        string
+		verbose     bool
+		showVersion bool
+	)
+	flag.StringVar(&name, "name", "", "上傳到 Drive 後的檔名(預設取本地檔名)")
+	flag.BoolVar(&verbose, "verbose", false, "顯示 debug 等級日誌")
+	flag.BoolVar(&showVersion, "version", false, "顯示版本號並結束")
+	flag.BoolVar(&showVersion, "v", false, "顯示版本號並結束(等同 --version)")
 	flag.Usage = usage
 	flag.Parse()
+
+	if showVersion {
+		fmt.Printf("%s %s\n", appName, version)
+		return nil
+	}
 
 	if flag.NArg() != 1 {
 		flag.Usage()
@@ -38,7 +54,7 @@ func run() error {
 	localPath := flag.Arg(0)
 
 	level := slog.LevelInfo
-	if *verbose {
+	if verbose {
 		level = slog.LevelDebug
 	}
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
@@ -61,7 +77,7 @@ func run() error {
 	}
 
 	log.Info("開始上傳", "file", localPath, "folderID", folderID)
-	f, err := up.Upload(ctx, localPath, *name)
+	f, err := up.Upload(ctx, localPath, name)
 	if err != nil {
 		return err
 	}

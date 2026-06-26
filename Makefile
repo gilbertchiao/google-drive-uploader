@@ -5,6 +5,7 @@ EMBED_CREDS := internal/embedded/credentials.json
 CREDENTIALS ?=
 FOLDER_ID   ?=
 SUBJECT     ?=
+VERSION     ?= v1.0.0
 
 .PHONY: build test fmt vet clean help
 
@@ -21,7 +22,7 @@ build:
 		trap 'printf "{}" > "$(EMBED_CREDS)"' EXIT; \
 		cp "$(CREDENTIALS)" "$(EMBED_CREDS)"; \
 		mkdir -p bin; \
-		CGO_ENABLED=0 go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT)" -o bin/$(BINARY) $(CMD_PKG); \
+		CGO_ENABLED=0 go build -ldflags "-X main.folderID=$(FOLDER_ID) -X main.subject=$(SUBJECT) -X main.version=$(VERSION)" -o bin/$(BINARY) $(CMD_PKG); \
 		echo "已輸出 bin/$(BINARY)(靜態,CGO_ENABLED=0)"
 
 test:

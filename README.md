@@ -1,7 +1,6 @@
 # google-drive-uploader
 
 用 Go 寫的 CLI 工具:build 後以 `gdrive-upload [檔案]` 把檔案上傳到 **build 時固定** 的 Google Drive 資料夾(同名覆蓋)。
-主要情境是在 Ubuntu 24.04 上把 log 檔(單檔 300–500MB)上傳到 Google Drive。
 
 特點:
 
@@ -66,7 +65,7 @@ make build CREDENTIALS=/path/to/credentials.json FOLDER_ID=<folderID>
 make build CREDENTIALS=/path/to/credentials.json FOLDER_ID=<folderID> SUBJECT=user@your-domain.com
 ```
 
-產出於 `bin/gdrive-upload`。
+產出於 `bin/gdrive-upload`。版本號預設為 `v1.0.0`,可加 `VERSION=vX.Y.Z` 覆寫(會編進 binary,執行 `gdrive-upload --version` 可查看)。
 
 > 安全性:版控中的 `internal/embedded/credentials.json` 永遠是佔位 `{}`;`make build` 只在編譯當下暫時放入真實憑證,
 > 結束後(含失敗)立即還原佔位,避免真實憑證被 commit。請勿將真實 `credentials.json` 加入版控。
@@ -84,7 +83,8 @@ gdrive-upload [選項] <本地檔案路徑>
 選項:
 
 - `-name <檔名>`:上傳到 Drive 後的檔名(預設取本地檔名)。
-- `-v`:顯示 debug 等級日誌。
+- `--verbose`:顯示 debug 等級日誌。
+- `-v`、`--version`:顯示版本號並結束。
 
 成功時 stdout 會印出該檔案的 Drive file ID。
 
@@ -98,7 +98,10 @@ gdrive-upload /var/log/myapp/app.log
 gdrive-upload -name myapp-latest.log /var/log/myapp/app.log
 
 # 觀察上傳進度
-gdrive-upload -v /var/log/myapp/app.log
+gdrive-upload --verbose /var/log/myapp/app.log
+
+# 顯示版本
+gdrive-upload --version
 ```
 
 ### 搭配 cron(每天上傳一次)

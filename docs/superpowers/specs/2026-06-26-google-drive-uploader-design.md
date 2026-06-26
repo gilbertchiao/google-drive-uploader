@@ -96,7 +96,7 @@ Makefile `build` 流程：
 
 ## 7. 執行行為
 
-1. 解析參數：取得本地檔案路徑；`-name` 可覆寫遠端檔名（預設 `filepath.Base()`）；`-v` 開 Debug log。
+1. 解析參數：取得本地檔案路徑；`-name` 可覆寫遠端檔名（預設 `filepath.Base()`）；`--verbose` 開 Debug log；`-v`/`--version` 顯示版本號（預設 `v1.0.0`，可於 build 時以 `-ldflags -X main.version` 覆寫）並結束。
 2. 啟動前驗證：
    - 本地檔案存在且可讀。
    - 內嵌 credentials 非佔位（含 `client_email` 與 `private_key`）。
