@@ -64,7 +64,7 @@ func newTestUploader(api driveAPI) *Uploader {
 func tempFile(t *testing.T, name string) string {
 	t.Helper()
 	p := filepath.Join(t.TempDir(), name)
-	require.NoError(t, os.WriteFile(p, []byte("hello"), 0o644))
+	require.NoError(t, os.WriteFile(p, []byte("hello"), 0o600))
 	return p
 }
 

@@ -1,0 +1,36 @@
+# golangci-lint 設定檔(v2 格式)
+# 文件: https://golangci-lint.run/
+# 執行: make lint  或  golangci-lint run ./...
+version: "2"
+
+run:
+  # 單次執行逾時上限,CI 上避免卡死
+  timeout: 5m
+
+linters:
+  # 在 v2 預設啟用的 linter(errcheck、govet、ineffassign、staticcheck、unused)之外,
+  # 再額外啟用幾個對品質與安全有幫助的檢查。
+  enable:
+    - misspell    # 拼字錯誤
+    - revive      # golint 後繼者,風格與慣例檢查
+    - gosec       # 安全性靜態掃描(本工具涉及憑證處理,建議保留)
+    - bodyclose   # 確認 HTTP response body 有正確關閉
+    - unconvert   # 移除多餘的型別轉換
+    - unparam     # 找出未被使用的函式參數
+  settings:
+    revive:
+      rules:
+        - name: exported          # 匯出符號需有註解
+        - name: error-strings     # 錯誤訊息字串慣例
+        - name: error-return      # error 應為最後一個回傳值
+
+formatters:
+  # 格式化工具(v2 將 formatter 與 linter 分離)
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      # 將本專案的 import 歸到獨立分組
+      local-prefixes:
+        - github.com/gilbertchiao/google-drive-uploader

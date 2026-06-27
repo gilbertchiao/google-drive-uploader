@@ -73,11 +73,13 @@ func (u *Uploader) Upload(ctx context.Context, localPath, remoteName string) (*d
 		return nil, err
 	}
 
+	// #nosec G304 -- localPath 由 CLI 使用者自行指定,上傳任意指定路徑的檔案即本工具用途
 	f, err := os.Open(localPath)
 	if err != nil {
 		return nil, fmt.Errorf("開啟本地檔案失敗: %w", err)
 	}
-	defer f.Close()
+	// 唯讀檔案,Close 失敗不影響上傳結果,明確忽略以滿足 errcheck
+	defer func() { _ = f.Close() }()
 
 	var result *drive.File
 	if len(existing) == 0 {
