@@ -7,12 +7,12 @@ FOLDER_ID   ?=
 SUBJECT     ?=
 VERSION     ?= v1.0.0
 
-.PHONY: build test fmt vet clean help
+.PHONY: build test fmt vet lint clean help
 
 help:
 	@echo "make build CREDENTIALS=path/to/credentials.json FOLDER_ID=xxx [SUBJECT=user@domain] [VERSION=vX.Y.Z]"
 	@echo "  VERSION 預設 v1.0.0,會編進 binary(gdrive-upload --version 可查看)"
-	@echo "make test | fmt | vet | clean"
+	@echo "make test | fmt | vet | lint | clean"
 
 ## build: 注入 credentials 與 folderID 後編譯,結束後還原佔位檔
 build:
@@ -34,6 +34,15 @@ fmt:
 
 vet:
 	go vet ./...
+
+## lint: 執行 golangci-lint(需先安裝,設定見 .golangci.yml)
+lint:
+	@command -v golangci-lint >/dev/null 2>&1 || { \
+		echo "錯誤: 未安裝 golangci-lint"; \
+		echo "  安裝方式請見 https://golangci-lint.run/welcome/install/"; \
+		exit 1; \
+	}
+	golangci-lint run ./...
 
 clean:
 	rm -rf bin

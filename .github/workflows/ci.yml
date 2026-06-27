@@ -1,0 +1,55 @@
+name: CI
+
+# 觸發時機:對 main 發 PR 時(主要需求),以及推送進 main 後再把關一次。
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# 最小權限原則:CI 只需讀取原始碼。
+permissions:
+  contents: read
+
+jobs:
+  # vet 與 test 共用同一份 Go 環境,放在同一個 job。
+  test:
+    name: vet & test
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取出原始碼
+        uses: actions/checkout@v4
+
+      - name: 安裝 Go(版本依 go.mod)
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: go vet
+        run: go vet ./...
+
+      # -race 開啟競態偵測(GitHub runner 預設支援 cgo,可正常使用)。
+      - name: go test
+        run: go test -race ./...
+
+  # golangci-lint 由官方 action 自行管理安裝;設定讀取 repo 根目錄的 .golangci.yml。
+  lint:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取出原始碼
+        uses: actions/checkout@v4
+
+      - name: 安裝 Go(版本依 go.mod)
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false # 由 golangci-lint-action 自行處理快取
+
+      # golangci-lint-action v8 對應 golangci-lint v2(本專案 .golangci.yml 為 v2 格式)。
+      # version 設為 latest 最不易壞;若要可重現的 CI,可改成固定版號如 v2.1.6。
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
