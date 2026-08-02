@@ -1,6 +1,6 @@
 module github.com/gilbertchiao/google-drive-uploader
 
-go 1.25.8
+go 1.26.0
 
 require (
 	github.com/stretchr/testify v1.11.1
